@@ -1,0 +1,14 @@
+# Build results
+bin/
+obj/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+
+# Secrets
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
