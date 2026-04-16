@@ -21,6 +21,10 @@ dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis
 
 dotnet ef migrations add InitialCreate
 
+<!-- Создание новой миграции -->
+
+dotnet ef migrations add AddTodosTable
+
 <!-- Применение миграций первый раз -->
 
 dotnet ef database update

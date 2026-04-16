@@ -26,6 +26,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 // Регистрируем наш сервис (Singleton = один на все приложение)
 builder.Services.AddScoped<ITextService, TextService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITodoService, TodoService>();
 
 var app = builder.Build();
 
