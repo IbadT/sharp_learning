@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using MyTextApi.Data;
@@ -21,15 +22,58 @@ public class UserService : IUserService
 
     public async Task<List<UserResponse>> GetAllUsersAsync()
     {
-        return await _context.Users
+        const string cacheKey = "users:all";
+
+        // получаем из redis
+        var cached = await _cache.GetStringAsync(cacheKey);
+        if (!string.IsNullOrEmpty(cached))
+        {
+            return JsonSerializer.Deserialize<List<UserResponse>>(cached)!;
+        }
+
+        // если нету в кэше - берем из бд
+        var users = await _context.Users
             .Select(u => MapToResponse(u))
             .ToListAsync();
+
+        // сохраняем в кэш
+        await _cache.SetStringAsync(
+            cacheKey,
+            JsonSerializer.Serialize(users),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = _cacheExpiration,
+            }
+        );
+
+        return users;
     }
 
     public async Task<UserResponse?> GetUserByIdAsync(int id)
     {
+        var cacheKey = $"users:{id}";
+
+        var cached = await _cache.GetStringAsync(cacheKey);
+        if (!string.IsNullOrEmpty(cached))
+        {
+            return JsonSerializer.Deserialize<UserResponse>(cached);
+        }
+
         var user = await _context.Users.FindAsync(id);
-        return user == null ? null : MapToResponse(user);
+        if (user == null) return null;
+
+        var response = MapToResponse(user);
+
+        await _cache.SetStringAsync(
+            cacheKey,
+            JsonSerializer.Serialize(response),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = _cacheExpiration,
+            }
+        );
+
+        return response;
     }
 
     public async Task<UserResponse> CreateUserAsync(CreateUserRequest request)
@@ -43,6 +87,10 @@ public class UserService : IUserService
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
+
+        // Инвалидируем кэш списка
+        await _cache.RemoveAsync("users:all");
+
         return MapToResponse(user);
     }
 
@@ -55,6 +103,11 @@ public class UserService : IUserService
         user.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // Инвалидируем кэш списка
+        await _cache.RemoveAsync($"users:{id}");
+        await _cache.RemoveAsync("users:all");
+
         return MapToResponse(user);
     }
 
@@ -65,6 +118,11 @@ public class UserService : IUserService
 
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();
+
+        // Инвалидируем кэш списка
+        await _cache.RemoveAsync($"users:{id}");
+        await _cache.RemoveAsync("users:all");
+
         return true;
     }
 
