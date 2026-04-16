@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using MyTextApi.Data;
 using MyTextApi.Interfaces;
 using MyTextApi.Services;
 using Scalar.AspNetCore;
@@ -7,11 +9,23 @@ var builder = WebApplication.CreateBuilder(args);
 // Добавляем сервисы в DI контейнер
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 
+// PostgreSQL + EF Core
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+// Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
+
 // Регистрируем наш сервис (Singleton = один на все приложение)
-builder.Services.AddSingleton<ITextService, TextService>();
+builder.Services.AddScoped<ITextService, TextService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -19,7 +33,6 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    // app.UseDeveloperExceptionPage();
     app.MapScalarApiReference(); // UI будет на /scalar
 }
 
