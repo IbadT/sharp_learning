@@ -17,6 +17,14 @@ dotnet add package Microsoft.EntityFrameworkCore.Design
 
 dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis
 
+<!-- Добавить Jwt -->
+
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+
+<!-- Добавить Bcrypt -->
+
+dotnet add package BCrypt.Net-Next
+
 <!-- Создание миграции -->
 
 dotnet ef migrations add InitialCreate

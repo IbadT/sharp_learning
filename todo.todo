@@ -1,0 +1,8 @@
+Поиск по названию задач
+4. Валидация через FluentValidation
+5. Логирование в файл (Serilog)
+6. Health Checks для БД и Redis
+7. Rate Limiting — ограничение запросов
+8. Background Job (Hangfire) — например, напоминания
+9. SignalR — real-time уведомления
+10. Unit/Integration тесты (xUnit)

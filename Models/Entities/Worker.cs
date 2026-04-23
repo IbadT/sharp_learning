@@ -1,15 +1,14 @@
 namespace MyTextApi.Models.Entities;
 
-public class User
+public class Worker
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    // Навигационное свойство для связи с Todo
-    public List<Todo> Todos { get; set; } = new();
-    public List<Worker> Workers { get; set; } = new();
+    // Связь с User
+    public int UserId { get; set; }
+    public User User { get; set; } = null!;
 }

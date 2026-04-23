@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyTextApi.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MyTextApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260417000006_RemoveTokensFromUser")]
+    partial class RemoveTokensFromUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,38 +101,6 @@ namespace MyTextApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MyTextApi.Models.Entities.Worker", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Worker");
-                });
-
             modelBuilder.Entity("MyTextApi.Models.Entities.Todo", b =>
                 {
                     b.HasOne("MyTextApi.Models.Entities.User", "User")
@@ -141,22 +112,9 @@ namespace MyTextApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MyTextApi.Models.Entities.Worker", b =>
-                {
-                    b.HasOne("MyTextApi.Models.Entities.User", "User")
-                        .WithMany("Workers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MyTextApi.Models.Entities.User", b =>
                 {
                     b.Navigation("Todos");
-
-                    b.Navigation("Workers");
                 });
 #pragma warning restore 612, 618
         }

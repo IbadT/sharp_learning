@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Todo> Todos { get; set; }
+    public DbSet<Worker> Workers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,6 +25,10 @@ public class AppDbContext : DbContext
                 .WithOne(t => t.User)
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(e => e.Workers)
+                .WithOne(w => w.User)
+                .HasForeignKey(w => w.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Todo configuration
@@ -31,6 +36,17 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+            entity.Property(e =>
+                e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e =>
+                e.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        modelBuilder.Entity<Worker>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Email).IsRequired();
+            entity.Property(e => e.Name).IsRequired();
             entity.Property(e =>
                 e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e =>
