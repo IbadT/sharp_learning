@@ -32,6 +32,16 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClient", policy =>
+    {
+        policy.WithOrigins("http://localhost:5200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 // JWT Authentication с поддержкой Cookie
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -77,24 +87,29 @@ if (app.Environment.IsDevelopment())
 
 
 // CORS для разработки (важно для cookies с фронтенда)
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors(policy => policy
-        .WithOrigins("http://localhost:3000", "http://localhost:5112")
-        .AllowCredentials()
-        .AllowAnyHeader()
-        .AllowAnyMethod());
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseCors(policy => policy
+//         .WithOrigins("http://localhost:3000", "http://localhost:5112")
+//         .AllowCredentials()
+//         .AllowAnyHeader()
+//         .AllowAnyMethod());
 
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+//     app.MapOpenApi();
+//     app.MapScalarApiReference();
+// }
+
+// app.UseCors("BlazorClient");
+app.UseCors("AllowClient");
+
 
 app.UseHttpsRedirection();
 
 
 // Важен порядок: CORS → Authentication → Authorization
-app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

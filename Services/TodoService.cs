@@ -80,21 +80,21 @@ public class TodoService : ITodoService
         return response;
     }
 
-    public async Task<TodoResponse> CreateTodoAsync(CreateTodoRequest request)
+    public async Task<TodoResponse> CreateTodoAsync(int userId, CreateTodoRequest request)
     {
         var userExists = await _context.Users
-            .AnyAsync(u => u.Id == request.UserId);
+            .AnyAsync(u => u.Id == userId);
 
         if (!userExists)
         {
-            throw new InvalidOperationException($"User {request.UserId} not found");
+            throw new InvalidOperationException($"User {userId} not found");
         }
 
         var todo = new Todo
         {
             Title = request.Title,
             Description = request.Description ?? string.Empty,
-            UserId = request.UserId,
+            UserId = userId,
             IsCompleted = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -104,7 +104,7 @@ public class TodoService : ITodoService
         await _context.SaveChangesAsync();
 
         // Инвалидируем кэш
-        await InvalidateCache(request.UserId);
+        await InvalidateCache(userId);
 
         // Загружаем User для ответа
         await _context.Entry(todo).Reference(t => t.User).LoadAsync();

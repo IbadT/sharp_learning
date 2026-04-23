@@ -15,12 +15,12 @@ public class CookieService : ICookieService
 
     public void SetAccessToken(string token, DateTime expiry)
     {
-        var context = _httpContextAccessor.HttpContext;
+        var context = _httpContextAccessor.HttpContext!;
         context.Response.Cookies.Append(AccessTokenName, token, new CookieOptions
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
+            HttpOnly = false,
+            Secure = false,
+            SameSite = SameSiteMode.Lax,
             Expires = expiry,
         });
     }
@@ -30,9 +30,9 @@ public class CookieService : ICookieService
         var context = _httpContextAccessor.HttpContext!;
         context.Response.Cookies.Append(RefreshTokenName, token, new CookieOptions
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
+            HttpOnly = false,
+            Secure = false,
+            SameSite = SameSiteMode.Lax,
             Expires = DateTime.UtcNow.AddDays(7),
         });
     }
@@ -49,7 +49,7 @@ public class CookieService : ICookieService
 
     public void ClearAuthCookies()
     {
-        var context = _httpContextAccessor.HttpContext;
+        var context = _httpContextAccessor.HttpContext!;
         context.Response.Cookies.Delete(AccessTokenName);
         context.Response.Cookies.Delete(RefreshTokenName);
     }

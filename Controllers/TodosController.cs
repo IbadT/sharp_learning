@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyTextApi.Interfaces;
 using MyTextApi.Models.DTOs;
+using System.Security.Claims;
 
 namespace MyTextApi.Controllers;
 
@@ -17,14 +19,17 @@ public class TodosController : ControllerBase
 
     // GET /api/todos
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAll()
     {
-        var todos = await _todoService.GetAllTodosAsync();
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var todos = await _todoService.GetTodosByUserIdAsync(userId);
         return Ok(todos);
     }
 
     // GET /api/todos/users/5
     [HttpGet("users/{userId}")]
+    [Authorize]
     public async Task<IActionResult> GetByUserId(int userId)
     {
         var todos = await _todoService.GetTodosByUserIdAsync(userId);
@@ -33,6 +38,7 @@ public class TodosController : ControllerBase
 
     // GET /api/todos/5
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<IActionResult> GetById(int id)
     {
         var todo = await _todoService.GetTodoByIdAsync(id);
@@ -43,11 +49,13 @@ public class TodosController : ControllerBase
 
     // POST /api/todos
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateTodoRequest request)
     {
         try
         {
-            var todo = await _todoService.CreateTodoAsync(request);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var todo = await _todoService.CreateTodoAsync(userId, request);
             return CreatedAtAction(nameof(GetById), new { id = todo.Id }, todo);
 
         }
@@ -59,6 +67,7 @@ public class TodosController : ControllerBase
 
     // PUT /api/todos/5
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateTodoRequest request)
     {
         var todo = await _todoService.UpdateTodoAsync(id, request);
@@ -69,6 +78,7 @@ public class TodosController : ControllerBase
 
     // PATCH /api/todos/5/toggle
     [HttpPatch("{id}/toggle")]
+    [Authorize]
     public async Task<IActionResult> Toggle(int id)
     {
         var todo = await _todoService.ToggleTodoAsync(id);
@@ -79,6 +89,7 @@ public class TodosController : ControllerBase
 
     // Delete /api/todos/5
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _todoService.DeleteTodoAsync(id);
